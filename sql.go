@@ -16,15 +16,15 @@ func (m *MasterDbInstance) DBX() *sqlx.DB {
 	return m.dbx
 }
 
-func NewMasterDbInstance(databaseURL string) *MasterDbInstance {
+func NewMasterDbInstance(driver string, databaseURL string) *MasterDbInstance {
 	return &MasterDbInstance{
-		dbx: NewSqlXInstance(databaseURL),
+		dbx: NewSqlXInstance(driver, databaseURL, 10),
 	}
 }
 
 // NewDatabase will create new database instance
-func NewSqlXInstance(databaseURL string) *sqlx.DB {
-	dbx, err := sqlx.Open("pgx", databaseURL)
+func NewSqlXInstance(driver string, databaseURL string, maxConnections int) *sqlx.DB {
+	dbx, err := sqlx.Open(driver, databaseURL)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -35,6 +35,6 @@ func NewSqlXInstance(databaseURL string) *sqlx.DB {
 
 	dbx.SetConnMaxLifetime(time.Minute * 5)
 	dbx.SetMaxIdleConns(0)
-	dbx.SetMaxOpenConns(5)
+	dbx.SetMaxOpenConns(maxConnections)
 	return dbx
 }
